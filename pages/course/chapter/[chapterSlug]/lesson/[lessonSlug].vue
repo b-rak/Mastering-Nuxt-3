@@ -26,7 +26,7 @@
         />
         <p>{{ lesson.text }}</p>
         <!--<ClientOnly> this component will only be rendered on the client side. Useful when Hydration 
-            leads to unexpected behaviour e.g. mixing up different element states from the client and the server -->
+            leads to unexpected behaviour called 'hydration mistmatch' e.g. mixing up different element states from the client and the server -->
             <LessonCompleteButton 
                 :model-value="isLessonComplete"
                 @update:model-value="toggleComplete"
