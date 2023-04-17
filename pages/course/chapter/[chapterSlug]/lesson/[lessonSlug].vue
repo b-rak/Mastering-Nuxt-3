@@ -25,7 +25,14 @@
             :videoId="`${lesson.videoId}`"
         />
         <p>{{ lesson.text }}</p>
-        <LessonCompleteButton v-model="progess"/>
+        <!--<ClientOnly> this component will only be rendered on the client side. Useful when Hydration 
+            leads to unexpected behaviour e.g. mixing up different element states from the client and the server -->
+            <LessonCompleteButton 
+                :model-value="isLessonComplete"
+                @update:model-value="toggleComplete"
+            />
+        <!--</ClientOnly> Instead using this tag-element we can also append the .client suffix 
+        to the component file name-->
     </div>
 </template>
 
@@ -55,5 +62,25 @@
         title,
     });
 
-    const progress = ref();
+    const progress = useLocalStorage('progress', []);
+
+    const isLessonComplete = computed(() => {
+        if (!progress.value[chapter.value.number - 1]) {
+            return false;
+        }
+
+        if (!progress.value[chapter.value.number - 1][lesson.value.number - 1]) {
+            return false;
+        }
+
+        return progress.value[chapter.value.number - 1][lesson.value.number - 1];
+    });
+
+    const toggleComplete = () => {
+        if (!progress.value[chapter.value.number - 1]) {
+            progress.value[chapter.value.number - 1] = [];
+        }
+
+        progress.value[chapter.value.number - 1][lesson.value.number - 1] = !isLessonComplete.value
+    };
 </script>

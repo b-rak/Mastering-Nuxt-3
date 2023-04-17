@@ -1,8 +1,11 @@
 <template>
-    <label for="">
-        <button>
-            
-        </button>
+    <label
+        class="rounded text-white font-bold py-2 px-4 cursor-pointer"
+        :class="{
+            'bg-green-500': modelValue,
+            'bg-gray-500': !modelValue
+        }"
+    >
         <input 
             type="checkbox"
             :value="modelValue"
