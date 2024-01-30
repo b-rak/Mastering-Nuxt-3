@@ -20,14 +20,14 @@
     "@vueuse/nuxt": "^10.7.0",
     "nuxt": "^3.9.3",
     "pinia": "^2.1.7",
-    "prisma": "^5.7.0",
+    "prisma": "^5.8.1",
     "tailwindcss": "^3.3.1",
     "vite-plugin-vsharp": "^1.6.0",
     "vue": "^3.4.15",
     "webpack": "^5.79.0"
   },
   "dependencies": {
-    "@prisma/client": "5.2.0",
+    "@prisma/client": "5.8.1",
     "h3": "^1.10.1",
     "help": "^3.0.2",
     "stripe": "^13.3.0"
