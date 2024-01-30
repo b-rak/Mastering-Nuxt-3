@@ -25,8 +25,9 @@
     <!--<ClientOnly> this component will only be rendered on the client side. Useful when Hydration 
             leads to unexpected behaviour called 'hydration mistmatch' e.g. mixing up different element states from the client and the server -->
     <LessonCompleteButton
-      :model-value="isLessonComplete"
-      @update:model-value="throwError"
+      v-if="user"
+      :model-value="isCompleted"
+      @update:model-value="toggleComplete"
     />
     <!--</ClientOnly> Instead using this tag-element we can also append the .client suffix 
         to the component file name-->
@@ -34,17 +35,25 @@
 </template>
 
 <script setup>
-const course = useCourse();
+import { useCourseProgress } from "~/stores/courseProgress.ts";
+const course = await useCourse();
 const route = useRoute();
+const user = useSupabaseUser();
+const { chapterSlug, lessonSlug } = route.params;
+const lesson = await useLesson(chapterSlug, lessonSlug);
+const store = useCourseProgress();
+const { initialize, toggleComplete } = store;
+
+initialize();
 
 definePageMeta({
   middleware: [
     //both middleware functions here are inline middleware: the order of the definition is important since they are run after the other.
     //in our case, let's say we try to navigate to an endpoint with a not existing chapter 'aklsnflasd', then the first middleware function redirects to an error page: Since the redirect to the login page is the second middleware function, the user won't be redirected to the login page
-    function ({ params }, from) {
-      const course = useCourse();
+    async function ({ params }, from) {
+      const course = await useCourse();
 
-      const chapter = course.chapters.find(
+      const chapter = course.value.chapters.find(
         (chapter) => chapter.slug === params.chapterSlug
       );
 
@@ -75,48 +84,24 @@ definePageMeta({
   ],
 });
 
+// Check if the current lesson is completed
+const isCompleted = computed(() => {
+  return store.progress?.[chapterSlug]?.[lessonSlug] || false;
+});
+
 const chapter = computed(() => {
-  return course.chapters.find(
+  return course.value.chapters.find(
     (chapter) => chapter.slug === route.params.chapterSlug
   );
 });
 
-const lesson = computed(() => {
-  return chapter.value.lessons.find(
-    (lesson) => lesson.slug === route.params.lessonSlug
-  );
-});
-
 const title = computed(() => {
-  return `${lesson.value.title} - ${course.title}`;
+  return `${lesson.value.title} - ${course.value.title}`;
 });
 
 useHead({
   title,
 });
-
-const progress = useLocalStorage("progress", []);
-
-const isLessonComplete = computed(() => {
-  if (!progress.value[chapter.value.number - 1]) {
-    return false;
-  }
-
-  if (!progress.value[chapter.value.number - 1][lesson.value.number - 1]) {
-    return false;
-  }
-
-  return progress.value[chapter.value.number - 1][lesson.value.number - 1];
-});
-
-const toggleComplete = () => {
-  if (!progress.value[chapter.value.number - 1]) {
-    progress.value[chapter.value.number - 1] = [];
-  }
-
-  progress.value[chapter.value.number - 1][lesson.value.number - 1] =
-    !isLessonComplete.value;
-};
 
 const throwError = () => {
   throw createError("Could not update");
